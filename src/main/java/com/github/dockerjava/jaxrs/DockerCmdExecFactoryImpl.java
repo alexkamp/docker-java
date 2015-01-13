@@ -60,6 +60,7 @@ import com.github.dockerjava.api.command.VersionCmd;
 import com.github.dockerjava.api.command.WaitContainerCmd;
 import com.github.dockerjava.core.CertificateUtils;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.jaxrs.util.DebuggingHttpClientConnectionManager;
 import com.github.dockerjava.jaxrs.util.JsonClientFilter;
 import com.github.dockerjava.jaxrs.util.ResponseStatusExceptionFilter;
 import com.github.dockerjava.jaxrs.util.SelectiveLoggingFilter;
@@ -96,8 +97,14 @@ public class DockerCmdExecFactoryImpl implements DockerCmdExecFactory {
 		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(getSchemeRegistry(originalUri));
 		connManager.setMaxTotal(dockerClientConfig.getMaxTotalConnections());
 		connManager.setDefaultMaxPerRoute(dockerClientConfig.getMaxPerRoutConnections());
-		clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER,
-                connManager);
+		
+		if(dockerClientConfig.withPoolingDebugger()) {
+			clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER,
+					new DebuggingHttpClientConnectionManager(connManager));
+		} else {
+			clientConfig.property(ApacheClientProperties.CONNECTION_MANAGER,
+					connManager);
+		}
         
         ClientBuilder clientBuilder = ClientBuilder.newBuilder().withConfig(clientConfig);
 

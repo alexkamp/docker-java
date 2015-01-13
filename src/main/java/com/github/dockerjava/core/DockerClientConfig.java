@@ -47,10 +47,12 @@ public class DockerClientConfig {
     
     private final int maxTotalConnections;
     private final int maxPerRouteConnections;
+    
+    private final boolean connectionDebugging;
 
     DockerClientConfig(URI uri, String version, String username, String password, String email,
     		String dockerCertPath, Integer readTimeout, boolean loggingFilterEnabled,
-    		int maxTotalConns, int maxPerRouteConns) {
+    		int maxTotalConns, int maxPerRouteConns, boolean connectionDebugging) {
         this.uri = uri;
         this.version = version;
         this.username = username;
@@ -62,6 +64,7 @@ public class DockerClientConfig {
         
         this.maxTotalConnections = maxTotalConns;
         this.maxPerRouteConnections = maxPerRouteConns;
+        this.connectionDebugging = connectionDebugging;
     }
 
     private static Properties loadIncludedDockerProperties(Properties systemProperties) {
@@ -272,6 +275,8 @@ public class DockerClientConfig {
         private String version, username, password, email, dockerCertPath;
         private Integer readTimeout, maxTotalConnections, maxPerRouteConnections;
         private boolean loggingFilterEnabled;
+        
+        private boolean connectionDebugging;
 
         /**
          * This will set all fields in the builder to those contained in the Properties object. The Properties object
@@ -343,6 +348,11 @@ public class DockerClientConfig {
             this.dockerCertPath = dockerCertPath;
             return this;
         }
+        
+    	public final DockerClientConfigBuilder withPoolingDebugger(boolean debug) {
+    		this.connectionDebugging = debug;
+    		return this;
+    	}
 
         public DockerClientConfig build() {
             return new DockerClientConfig(
@@ -355,7 +365,8 @@ public class DockerClientConfig {
                     readTimeout,
                     loggingFilterEnabled,
                     maxTotalConnections,
-                    maxPerRouteConnections
+                    maxPerRouteConnections,
+                    connectionDebugging
             );
         }
     }
@@ -366,5 +377,9 @@ public class DockerClientConfig {
 
 	public int getMaxPerRoutConnections() {
 		return maxPerRouteConnections;
+	}
+
+	public boolean withPoolingDebugger() {
+		return connectionDebugging;
 	}
 }
